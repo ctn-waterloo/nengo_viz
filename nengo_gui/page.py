@@ -275,6 +275,9 @@ class Page(object):
         self.locals["nengo_gui"] = nengo_gui
         self.locals["_viz_config"] = config
         fname = self.filename_cfg
+
+        # force flush the config cache before loading it
+        self.save_config(lazy=False)
         if os.path.exists(fname):
             with open(fname) as f:
                 config_code = f.readlines()
