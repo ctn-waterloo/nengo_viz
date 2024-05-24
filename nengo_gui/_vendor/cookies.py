@@ -124,7 +124,7 @@ class Definitions(object):
     COOKIE_OCTET = r"\x21\x23-\x2B\--\x3A\x3C-\x5B\]-\x7E"
 
     # extension-av - also happens to be a superset of cookie-av and path-value
-    EXTENSION_AV = """ !"#$%&\\\\'()*+,\-./0-9:<=>?@A-Z[\\]^_`a-z{|}~"""
+    EXTENSION_AV = """ !"#$%&\\\\'()*+,\\-./0-9:<=>?@A-Z[\\]^_`a-z{|}~"""
 
     # This is for the first pass parse on a Set-Cookie: response header. It
     # includes cookie-value, cookie-pair, set-cookie-string, cookie-av.
@@ -147,7 +147,7 @@ class Definitions(object):
 
         # Extract everything up to the end in one chunk, which will be broken
         # down in the second pass. Don't match if there's any unexpected
-        # garbage at the end (hence the \Z; $ matches before newline).
+        # garbage at the end (hence the \\Z; $ matches before newline).
         (?P<attrs>(?:;[ ]*[{cookie_av}]+)*)
         """.format(name=COOKIE_NAME, cookie_av=EXTENSION_AV + ";",
                    cookie_octet=COOKIE_OCTET, value="[^;]")
@@ -163,8 +163,8 @@ class Definitions(object):
 
     # Domain attribute; a label is one part of the domain
     LABEL = '{let_dig}(?:(?:{let_dig_hyp}+)?{let_dig})?'.format(
-            let_dig="[A-Za-z0-9]", let_dig_hyp="[0-9A-Za-z\-]")
-    DOMAIN = "\.?(?:{label}\.)*(?:{label})".format(label=LABEL)
+            let_dig="[A-Za-z0-9]", let_dig_hyp="[0-9A-Za-z\\-]")
+    DOMAIN = "\\.?(?:{label}\\.)*(?:{label})".format(label=LABEL)
     # Parse initial period though it's wrong, as RFC 6265 4.1.2.3
     DOMAIN_AV = "Domain=(?P<domain>{domain})".format(domain=DOMAIN)
 
@@ -199,7 +199,7 @@ class Definitions(object):
     WEEKDAY_LONG = "(?:" + "|".join(item for item in weekday_list) + ")"
 
     # This regexp tries to exclude obvious nonsense in the first pass.
-    DAY_OF_MONTH = "(?:[0 ]?[1-9]|[12][0-9]|[3][01])(?!\d)"
+    DAY_OF_MONTH = "(?:[0 ]?[1-9]|[12][0-9]|[3][01])(?!\\d)"
 
     # Here is the overall date format; ~99% of cases fold into one generalized
     # syntax like RFC 1123, and many of the rest use asctime-like formats.
@@ -208,34 +208,34 @@ class Definitions(object):
         (?:
             (?P<weekday>(?:{wdy}|{weekday}),[ ])?
             (?P<day>{day})
-            [ \-]
+            [ \\-]
             (?P<month>{mon}|{month})
-            [ \-]
+            [ \\-]
             # This does not support 3-digit years, which are rare and don't
             # seem to have one canonical interpretation.
-            (?P<year>(?:\d{{2}}|\d{{4}}))
+            (?P<year>(?:\\d{{2}}|\\d{{4}}))
             [ ]
             # HH:MM[:SS] GMT
             (?P<hour>(?:[ 0][0-9]|[01][0-9]|2[0-3]))
             :(?P<minute>(?:0[0-9]|[1-5][0-9]))
-            (?::(?P<second>\d{{2}}))?
+            (?::(?P<second>\\d{{2}}))?
             [ ]GMT
         |
             # Support asctime format, e.g. 'Sun Nov  6 08:49:37 1994'
             (?P<weekday2>{wdy})[ ]
             (?P<month2>{mon})[ ]
-            (?P<day2>[ ]\d|\d\d)[ ]
-            (?P<hour2>\d\d):
-            (?P<minute2>\d\d)
-            (?::(?P<second2>\d\d)?)[ ]
-            (?P<year2>\d\d\d\d)
+            (?P<day2>[ ]\\d|\\d\\d)[ ]
+            (?P<hour2>\\d\\d):
+            (?P<minute2>\\d\\d)
+            (?::(?P<second2>\\d\\d)?)[ ]
+            (?P<year2>\\d\\d\\d\\d)
             (?:[ ]GMT)?  # GMT (Amazon)
         )
     """
     DATE = DATE.format(wdy=WEEKDAY_SHORT, weekday=WEEKDAY_LONG,
                        day=DAY_OF_MONTH, mon=MONTH_SHORT, month=MONTH_LONG)
 
-    EXPIRES_AV = "Expires=(?P<expires>%s)" % DATE
+    EXPIRES_AV = "Expires=(?P<expires>%s)" % DATE[5:]
 
     # Now we're ready to define a regexp which can match any number of attrs
     # in the variable portion of the Set-Cookie header (like the unnamed latter
@@ -303,17 +303,17 @@ class Definitions(object):
         [ ]*
         # Must end with ; or be at end of string (don't consume this though,
         # so use the lookahead assertion ?=
-        (?=;|\Z)
+        (?=;|\\Z)
     """.format(name=COOKIE_NAME, value=COOKIE_OCTET)
 
     # Precompile externally useful definitions into re objects.
-    COOKIE_NAME_RE = re.compile("^([%s:]+)\Z" % COOKIE_NAME)
+    COOKIE_NAME_RE = re.compile("^([%s:]+)\\Z" % COOKIE_NAME)
     COOKIE_RE = re.compile(COOKIE)
     SET_COOKIE_HEADER_RE = re.compile(SET_COOKIE_HEADER)
     ATTR_RE = re.compile(ATTR)
     DATE_RE = re.compile(DATE)
     DOMAIN_RE = re.compile(DOMAIN)
-    PATH_RE = re.compile('^([%s]+)\Z' % EXTENSION_AV)
+    PATH_RE = re.compile('^([%s]+)\\Z' % EXTENSION_AV)
     EOL = re.compile("(?:\r\n|\n)")
 
 
@@ -966,7 +966,7 @@ class Cookie(object):
         'path':     valid_path,
         'max_age':  valid_max_age,
         'comment':  valid_value,
-        'version':  lambda number: re.match("^\d+\Z", str(number)),
+        'version':  lambda number: re.match("^\\d+\\Z", str(number)),
         'secure':   lambda item: item is True or item is False,
         'httponly': lambda item: item is True or item is False,
     }
