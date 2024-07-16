@@ -172,6 +172,8 @@ Nengo.Modal.prototype.help_body = function() {
                  '<td align="right">' + ctrl + '-1</td></tr>'); //TODO: possibly pick a better shortcut key
     $body.append('<tr><td>Toggle auto-update</td>'+
                  '<td align="right">' + ctrl + '-' + shift + '-1</td></tr>');
+    $body.append('<tr><td>Disable resize</td>'+
+                 '<td align="right">' + ctrl + '</td></tr>');
     $body.append('<tr><td>Show hotkeys</td>'+
                  '<td align="right">?</td></tr>');
     $body.append('</table>');
