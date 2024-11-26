@@ -14,7 +14,7 @@
 
 # Whenever you make a connection, you can specify a "synapse" value.  This
 # indicates the properties of the neurotransmitters and synapses (the actual
-# connections between neurons).  The most important paramter is the
+# connections between neurons).  The most important parameter is the
 # time constant: the amount of time it takes for the effects of a single spike
 # to wear off.  For some parts of the brain, this is very fast (0.002 seconds)
 # and in other parts it is very slow (0.2 seconds).  If you don't specify it,
